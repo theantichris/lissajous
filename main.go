@@ -10,11 +10,16 @@ import (
 	"os"
 )
 
-var palette = []color.Color{color.RGBA{0x00, 0x00, 0x00, 0x00}, color.RGBA{0x00, 0xff, 0x00, 0x00}}
+var palette = []color.Color{
+	color.RGBA{0x00, 0x00, 0x00, 0x00},
+	color.RGBA{0x00, 0xff, 0x00, 0x00},
+	color.RGBA{0xff, 0x00, 0x00, 0x00},
+}
 
 const (
 	blackIndex = 0
 	greenIndex = 1
+	redIndex   = 2
 )
 
 func main() {
@@ -33,6 +38,7 @@ func lissajous(out io.Writer) {
 	freq := rand.Float64() * 3.0 // relative frequency of y oscillator
 	animation := gif.GIF{LoopCount: numberOfFrames}
 	phase := 0.0 // phase difference
+	swapColor := false
 
 	for i := 0; i < numberOfFrames; i++ {
 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
@@ -42,7 +48,16 @@ func lissajous(out io.Writer) {
 			x := math.Sin(t)
 			y := math.Sin(t*freq + phase)
 
-			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), greenIndex)
+			var loopColor uint8
+			if swapColor {
+				loopColor = greenIndex
+			} else {
+				loopColor = redIndex
+			}
+
+			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), loopColor)
+
+			swapColor = !swapColor
 		}
 
 		phase += 0.1
